@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link rel="stylesheet" href="http://view.gitlab.pro/common-ui/base-css/raw/mini/dist/base.ltr.ie.css">
+    <link rel="stylesheet" href="http://view.gitlab.pro/common-ui/ui/raw/master/dist/ui.css">
+    <link rel="stylesheet" href="../src/calendar.css">
+    <style>
+    h2{ font-size: 50px; padding: 10px 0;}
+    </style>
+    <script src="js/console.js"></script>
+    <script src="js/mod.js"></script>
+    <script src="js/js_framework.js"></script>
+    <script src="http://view.gitlab.pro/common-ui/date/raw/master/src/date.js?1"></script>
+    <script src="../src/calendar.js"></script>
+</head>
+<body>
+
+    <h2>simple:</h2>
+    <div id="simple" class="ui-bubble ui-bubble-t mod-calendar">
+        <b class="ui-arrow ui-bubble_out"></b>
+        <b class="ui-arrow ui-bubble_in"></b>
+        <div class="mod-calendar_hd">
+            <a href="#" class="mod-calendar_next">→</a>
+            <a href="#" class="mod-calendar_prev">←</a>
+            <select class="mod-calendar_year"></select>
+            <select class="mod-calendar_month"></select>
+        </div>
+        <div class="mod-calendar_bd">
+            <ul class="mod-calendar_grid mod-calendar_weeks cf"></ul>
+            <ul class="mod-calendar_grid mod-calendar_days cf"></ul>
+        </div>
+        <div class="mod-calendar_ft"></div>
+    </div>
+
+    <h2>mini:</h2>
+
+    <div id="mini" class="ui-bubble ui-bubble-t mod-calendar mod-calendar--mini">
+        <b class="ui-arrow ui-bubble_out"></b>
+        <b class="ui-arrow ui-bubble_in"></b>
+        <div class="mod-calendar_hd">
+            <a href="#" class="mod-calendar_next">→</a>
+            <a href="#" class="mod-calendar_prev">←</a>
+            <select class="mod-calendar_year"></select>
+            <select class="mod-calendar_month"></select>
+        </div>
+        <div class="mod-calendar_bd">
+            <ul class="mod-calendar_grid mod-calendar_weeks cf"></ul>
+            <ul class="mod-calendar_grid mod-calendar_days cf"></ul>
+        </div>
+        <div class="mod-calendar_ft"></div>
+    </div>
+
+    <h2>full:</h2>
+
+    <div id="full" class="ui-bubble ui-bubble-t mod-calendar mod-calendar--full">
+        <b class="ui-arrow ui-bubble_out"></b>
+        <b class="ui-arrow ui-bubble_in"></b>
+        <div class="mod-calendar_hd">
+            <a href="#" class="mod-calendar_next">→</a>
+            <a href="#" class="mod-calendar_prev">←</a>
+            <select class="mod-calendar_year"></select>
+            <select class="mod-calendar_month"></select>
+        </div>
+        <div class="mod-calendar_bd">
+            <ul class="mod-calendar_grid mod-calendar_weeks cf"></ul>
+            <ul class="mod-calendar_grid mod-calendar_days cf"></ul>
+        </div>
+        <div class="mod-calendar_ft"></div>
+    </div>
+</body>
+
+<script>
+var $ = jQuery;
+
+$("#simple").calendar({
+    footer: '<a href="#">更详细日历信息</a>'
+    , onFilterDays: function(data) {
+        if(data.d === 1) data.info = "No.1";
+        return data;
+    }
+});
+
+$("#mini").calendar({
+
+});
+
+$("#full").calendar({
+
+});
+</script>
+</html>
