@@ -175,14 +175,6 @@
         });
     }
 
-    fn.get = function() {
-        
-    }
-
-    fn.set = function() {
-        
-    }
-
     fn.render = function($el, tpl, data, filter) {
         data = $.isArray(data) ? data : [data];
         var ret = [];
@@ -219,7 +211,7 @@
             e.preventDefault();
             var m = +that.$month.val();
             if(m === 12) {
-                m = 2;
+                m = 0;
                 that.$year.val(+that.$year.val() + 1);
             }
             that.$month.val(m + 1);
