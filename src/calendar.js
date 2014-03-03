@@ -51,6 +51,7 @@
                 , isAbbrWeek: true
                 , isFromSunday: 0
 
+                , switchLoop: false
 
                 , onSwitch: noop
                 , onFilterDays: function(o) {
@@ -58,13 +59,15 @@
                 }
             }, args);
 
-            that.yearFrom = +that.args.yearFrom;
-            that.yearTo = +that.args.yearTo;
             that.pre = that.args.selectorPrefix;
 
             if(that.args.isFromSunday) that.args.weeks.splice(that.args.weeks.length,0,that.args.weeks.splice(0, 1)[0]);
 
             that.now = new Date(that.args.now).format();
+
+            that.yearFrom = (that.yearFrom = +that.args.yearFrom) > 99 ? that.yearFrom : that.now.y - that.yearFrom;
+
+            that.yearTo = (that.yearTo = +that.args.yearTo) > 99 ? that.yearTo : that.now.y + that.yearTo;
 
             that.state = {};
 
@@ -80,9 +83,7 @@
     fn.init = function() {
         var that = this
             , $el = that.$el
-            , render = that.render
-            , yearFrom = that.yearFrom > 99 ? that.yearFrom : that.now.y - that.yearFrom
-            , yearTo = that.yearTo > 99 ? that.yearTo : that.now.y + that.yearTo;
+            , render = that.render;
 
         that.$year = $el.find("." + that.pre + "_year");
         that.$month = $el.find("." + that.pre + "_month");
@@ -93,8 +94,8 @@
         that.$footer = $el.find("." + that.pre + "_ft");
 
         // render year
-        that.render(that.$year, that.args.tplMenu, new Array(yearTo - yearFrom + 1), function(li, i) {
-            var year = i + yearFrom;
+        that.render(that.$year, that.args.tplMenu, new Array(that.yearTo - that.yearFrom + 1), function(li, i) {
+            var year = i + that.yearFrom;
             return {
                 val: year
                 , selected: year === that.now.y ? 'selected="selected"' : ""
@@ -145,7 +146,7 @@
             className: className
             , d: d
             , info: info
-        })
+        });
     }
 
     fn.renderDays = function(M, y, filter) {
@@ -167,7 +168,6 @@
                 className = 'class=' + that.pre + "-holder";
             }
             else if(y === that.now.y && M === that.now.M && d === that.now.d) {
-                console.log(d, that.now.d)
                 className = 'class=' + that.pre + "-today";
             }
 
@@ -198,24 +198,54 @@
 
         that.$prev.click(function(e) {
             e.preventDefault();
-            var m = +that.$month.val();
-            if(m === 1) {
-                m = 13;
-                that.$year.val(+that.$year.val() - 1);
-            }
-            that.$month.val(m - 1);
+            var m = +that.$month.val()
+                , y = +that.$year.val();
             switchHandle();
+            $(that.$next).removeClass("mod-calendar-disable");
+            if(m === 1) {
+                if(y === that.yearFrom) {
+                    if(that.args.switchLoop) {
+                        that.$month.val(12);
+                        that.$year.val(that.yearTo);
+                    }
+                    else {
+                        $(this).addClass("mod-calendar-disable");
+                    }
+                }
+                else {
+                    that.$month.val(12);
+                    that.$year.val(y - 1);
+                }
+            }
+            else {
+                that.$month.val(m - 1);
+            }
         });
 
         that.$next.click(function(e) {
             e.preventDefault();
-            var m = +that.$month.val();
-            if(m === 12) {
-                m = 0;
-                that.$year.val(+that.$year.val() + 1);
-            }
-            that.$month.val(m + 1);
+            var m = +that.$month.val()
+                , y = +that.$year.val();
             switchHandle();
+            $(that.$prev).removeClass("mod-calendar-disable");
+            if(m === 12) {
+                if(y === that.yearTo) {
+                    if(that.args.switchLoop) {
+                        that.$month.val(1);
+                        that.$year.val(that.yearFrom);
+                    }
+                    else {
+                        $(this).addClass("mod-calendar-disable");
+                    }
+                }
+                else {
+                    that.$month.val(1);
+                    that.$year.val(y + 1);
+                }
+            }
+            else {
+                that.$month.val(m + 1);
+            }
         });
     }
 

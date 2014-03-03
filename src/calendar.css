@@ -184,6 +184,8 @@ li.mod-calendar-today{ position: relative; border-bottom: none;}
 .mod-calendar-holder dl{ background: #F3F2F2; color: #BFBEBE;}
 .mod-calendar-holder dt{ color: #B5B5B5;}
 
+.mod-calendar-disable{ color: #999 !important; cursor: default;}
+
 /*
 extend
  */
