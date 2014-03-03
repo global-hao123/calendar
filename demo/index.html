@@ -77,7 +77,24 @@ var $ = jQuery;
 $("#simple").calendar({
     footer: '<a href="#">更详细日历信息</a>'
     , onFilterDays: function(data) {
-        if(data.d === 1) data.info = "No.1";
+        var pre = this.args.selectorPrefix
+            , d = data.d;
+        data.info = "农历";
+        if(d == 9) {
+            data.info = "This is a event.";
+            data.className = 'class=' + pre + "-event";
+        }
+
+        if(d == 11) {
+            data.info = "This is a holiday.";
+            data.className = 'class=' + pre + "-holiday";
+        }
+
+        if(d == 13) {
+            data.info = "This is a festival.";
+            data.className = 'class=' + pre + "-festival";
+        }
+        if(d === 1) data.info = "No.1";
         return data;
     }
 });

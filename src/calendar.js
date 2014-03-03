@@ -37,9 +37,9 @@
                 now: new Date
                 , selectorPrefix: "mod-calendar"
                 , weeks: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-                , tplMenu: '<option value="#{val}" #{selected}>#{val}</option>'
+                , tplMenu: '<option value="#{val}" #{selected}>#{name}</option>'
                 , tplWeek: '<li>#{name}</li>'
-                , tplDay: '<li #{className}><a href="#"><dl><dt>#{d}</dt><dd>#{info}</dd></dl></a></li>'
+                , tplDay: '<li #{className}><a href="#{url}" class="#{noLink}"><dl><dt>#{d}</dt><dd>#{info}</dd></dl></a></li>'
 
                 , footer: ""
 
@@ -47,9 +47,9 @@
                 , yearFrom: 10
                 , yearTo: 10
 
-
                 , isAbbrWeek: true
-                , isFromSunday: 0
+                // , isFromSunday: 0
+                , beginDay: 1
 
                 , switchLoop: false
 
@@ -61,7 +61,7 @@
 
             that.pre = that.args.selectorPrefix;
 
-            if(that.args.isFromSunday) that.args.weeks.splice(that.args.weeks.length,0,that.args.weeks.splice(0, 1)[0]);
+            that.args.weeks = that.args.weeks.splice(that.args.beginDay, that.args.weeks.length).concat(that.args.weeks.splice(0, that.args.beginDay + 1));
 
             that.now = new Date(that.args.now).format();
 
@@ -95,16 +95,22 @@
 
         // render year
         that.render(that.$year, that.args.tplMenu, new Array(that.yearTo - that.yearFrom + 1), function(li, i) {
-            var year = i + that.yearFrom;
+            var year = i + that.yearFrom
+                , name = year;
+            if(that.args.fixYear) name = that.args.fixYear(year);
             return {
                 val: year
+                , name: name
                 , selected: year === that.now.y ? 'selected="selected"' : ""
             }
         });
 
         that.render(that.$month, that.args.tplMenu, new Array(12), function(li, i) {
+            var name = i + 1;
+            if(that.args.fixMonth) name = that.args.fixMonth(i);
             return {
                 val: i + 1
+                , name: name
                 , selected: i + 1 === that.now.M ? 'selected="selected"' : ""
             }
         });
@@ -121,31 +127,16 @@
         that.bindEvents();
     }
 
-    // TODO handle events.
-    fn.filterDays = function(y, M, d, className, info) {
+    // handle events.
+    fn.filterDays = function(y, M, d, className, info, url) {
         var that = this;
-
-        info = "农历";
-
-        if(d == 9) {
-            info = "This is a event.";
-            className = 'class=' + that.pre + "-event";
-        }
-
-        if(d == 11) {
-            info = "This is a holiday.";
-            className = 'class=' + that.pre + "-holiday";
-        }
-
-        if(d == 13) {
-            info = "This is a festival.";
-            className = 'class=' + that.pre + "-festival";
-        }
-
-        return that.args.onFilterDays({
+        return that.args.onFilterDays.call(that, {
             className: className
             , d: d
+            , y: y
+            , M: M
             , info: info
+            , url: url || "#"
         });
     }
 
@@ -153,25 +144,32 @@
         var that = this;
 
         that.render(that.$days, that.args.tplDay, new Array(7 * 6), function(className, d, info) {
-            var begin = new Date(y, M - 1, 1).format().w - 1 - (that.args.isFromSunday ? 1 : 0)
-                , total = Date.days(M, y);
+
+            var begin = new Date(y, M - 1, 1).format().w - 1 - that.args.beginDay
+                , total = Date.days(M, y)
+                , _M = M;
+
             if(begin < -1) begin = begin + 7;
             d = d - begin;
             info = "";
             className = "";
+
+             // fix month
             if(d < 1) {
-                d = d + (M === 1 ? Date.days(12, y - 1) : Date.days(M - 1, y));
+                _M = M - 1;
+                d = d + (!_M ? Date.days(12, y - 1) : Date.days(_M, y));
                 className = 'class=' + that.pre + "-holder";
             }
             else if(d > total) {
                 d = d - total;
+                _M = M + 1;
                 className = 'class=' + that.pre + "-holder";
             }
-            else if(y === that.now.y && M === that.now.M && d === that.now.d) {
+            else if(y === that.now.y && _M === that.now.M && d === that.now.d) {
                 className = 'class=' + that.pre + "-today";
             }
 
-            return that.filterDays(y, M, d, className, info);
+            return that.filterDays(y, _M, d, className, info);
         });
     }
 
@@ -188,10 +186,10 @@
         var that = this
             , switchHandle = function(e) {
                 that.renderDays(+that.$month.val(), +that.$year.val());
-                that.args.onSwitch({
+                that.args.onSwitch.call(that, {
                     y: +that.$year.val()
                     , M: +that.$month.val()
-                });
+                }, that.$year, that.$month);
             };
         that.$year.change(switchHandle);
         that.$month.change(switchHandle);
