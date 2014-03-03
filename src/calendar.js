@@ -34,26 +34,100 @@
             that.el = $el[0];
 
             that.args = $.extend({
+
+                /**
+                 * You may provide a new date object to rewrite now
+                 * @type {Date}
+                 */
                 now: new Date
+
+                /**
+                 * Default module selector prefix
+                 * @type {String}
+                 */
                 , selectorPrefix: "mod-calendar"
+
+                /**
+                 * Default text of weeks
+                 * @type {Array}
+                 */
                 , weeks: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+                /**
+                 * Menu tpl
+                 * @type {String}
+                 */
                 , tplMenu: '<option value="#{val}" #{selected}>#{name}</option>'
+
+                /**
+                 * Week cell tpl
+                 * @type {String}
+                 */
                 , tplWeek: '<li>#{name}</li>'
+
+                /**
+                 * Day cell tpl
+                 * @type {String}
+                 */
                 , tplDay: '<li #{className}><a href="#{url}" class="#{noLink}"><dl><dt>#{d}</dt><dd>#{info}</dd></dl></a></li>'
 
+                /**
+                 * Footer html snippets
+                 * @type {String}
+                 */
                 , footer: ""
 
-                // 1983 / 10
-                , yearFrom: 10
-                , yearTo: 10
+                /**
+                 * Custom min date or the offset of begin date
+                 * @notice support: "2014-3-1" | 2 | "-1"
+                 * @notice Built-Lunar only supports 1901-1-1 ~ 2049-12-31
+                 * @type {String | Number}
+                 */
+                , minDate: "2004-3-1"
 
+                /**
+                 * Custom max date or the offset of end date
+                 * @notice support: "2014-3-1" | 2 | "-1"
+                 * @notice Built-Lunar only supports 1901-1-1 ~ 2049-12-31
+                 * @type {String | Number}
+                 */
+                , maxDate: "2024-3-1"
+
+                /**
+                 * Abbreviation week(3 letters, uppercase)
+                 * @type {Boolean}
+                 */
                 , isAbbrWeek: true
-                // , isFromSunday: 0
+
+                /**
+                 * the beginning week name of the week
+                 * @type {Number}
+                 */
                 , beginDay: 1
 
+                /**
+                 * Whether to allow loop switch
+                 * @type {Boolean}
+                 */
                 , switchLoop: false
 
+                /**
+                 * Custom switch date handle
+                 * @type {[Function]}
+                 */
                 , onSwitch: noop
+
+                /**
+                 * Custom click handle
+                 * @type {[Function]}
+                 */
+                , onClick: noop
+
+                /**
+                 * The filter of day render
+                 * @param  {[Object]} o {className, d, y, M, info, url}
+                 * @return {[Object]}
+                 */
                 , onFilterDays: function(o) {
                     return o;
                 }
@@ -63,11 +137,13 @@
 
             that.args.weeks = that.args.weeks.splice(that.args.beginDay, that.args.weeks.length).concat(that.args.weeks.splice(0, that.args.beginDay + 1));
 
-            that.now = new Date(that.args.now).format();
+            that.now = new Date(that.args.now);
 
-            that.yearFrom = (that.yearFrom = +that.args.yearFrom) > 99 ? that.yearFrom : that.now.y - that.yearFrom;
+            that.minDate = (+(that.minDate = that.args.minDate) ? that.now.add(+that.minDate) : new Date(that.minDate)).format();
 
-            that.yearTo = (that.yearTo = +that.args.yearTo) > 99 ? that.yearTo : that.now.y + that.yearTo;
+            that.maxDate = (+(that.maxDate = that.args.maxDate) ? that.now.add(+that.maxDate) : new Date(that.maxDate)).format();
+
+            that.now = that.now.format();
 
             that.state = {};
 
@@ -85,17 +161,13 @@
             , $el = that.$el
             , render = that.render;
 
-        that.$year = $el.find("." + that.pre + "_year");
-        that.$month = $el.find("." + that.pre + "_month");
-        that.$weeks = $el.find("." + that.pre + "_weeks");
-        that.$days = $el.find("." + that.pre + "_days");
-        that.$prev = $el.find("." + that.pre + "_prev");
-        that.$next = $el.find("." + that.pre + "_next");
-        that.$footer = $el.find("." + that.pre + "_ft");
+        $("year|month|weeks|days|prev|next|ft".split("|")).map(function(i, li) {
+            that["$" + li] = $el.find("." + that.pre + "_" + li);
+        })
 
         // render year
-        that.render(that.$year, that.args.tplMenu, new Array(that.yearTo - that.yearFrom + 1), function(li, i) {
-            var year = i + that.yearFrom
+        that.render(that.$year, that.args.tplMenu, new Array(that.maxDate.y - that.minDate.y + 1), function(li, i) {
+            var year = i + that.minDate.y
                 , name = year;
             if(that.args.fixYear) name = that.args.fixYear(year);
             return {
@@ -105,26 +177,34 @@
             }
         });
 
-        that.render(that.$month, that.args.tplMenu, new Array(12), function(li, i) {
-            var name = i + 1;
-            if(that.args.fixMonth) name = that.args.fixMonth(i);
-            return {
-                val: i + 1
-                , name: name
-                , selected: i + 1 === that.now.M ? 'selected="selected"' : ""
-            }
-        });
-
         that.render(that.$weeks, that.args.tplWeek, that.args.weeks, function(li, i) {
             return {
                 name: that.args.isAbbrWeek ? li.slice(0, 3).toUpperCase() : li
             }
         });
 
-        that.$footer.html(that.args.footer);
-
+        that.$ft.html(that.args.footer);
+        that.renderMonths(that.now.y, that.now.M);
         that.renderDays(that.now.M, that.now.y);
+        that.fixBtnStatus(that.now.y, that.now.M);
         that.bindEvents();
+    }
+
+    fn.renderMonths = function(y) {
+        var that = this
+            , l = 12;
+
+        if(y === that.maxDate.y) l = that.maxDate.M;
+        if(y === that.minDate.y) l = l - that.minDate.M + 1;
+
+        that.render(that.$month, that.args.tplMenu, new Array(l), function(li, i) {
+            i = i + (y === that.minDate.y ? that.minDate.M : 1);
+            return {
+                val: i
+                , name: that.args.fixMonth ? that.args.fixMonth(i) : i
+                , selected: i === that.now.M ? 'selected="selected"' : ""
+            }
+        });
     }
 
     // handle events.
@@ -169,6 +249,11 @@
                 className = 'class=' + that.pre + "-today";
             }
 
+            // fix selectable date range
+            if(new Date(that.minDate.y, that.minDate.M - 1, that.minDate.d).diff(new Date(y, _M - 1, d - 1)).d < 0
+            || new Date(that.maxDate.y, that.maxDate.M - 1, that.maxDate.d).diff(new Date(y, _M - 1, d + 1)).d > 0)
+            className = 'class=' + that.pre + "-holder";
+
             return that.filterDays(y, _M, d, className, info);
         });
     }
@@ -182,68 +267,104 @@
         $el.html(ret.join(""));
     }
 
+    fn.fixBtnStatus = function(y, M) {
+        var that = this
+            , className = that.pre + "-disable";
+        if(that.args.switchLoop) return;
+        $(that.$next).removeClass(className);
+        $(that.$prev).removeClass(className);
+        y = y || +that.$year.val();
+        M = M || +that.$month.val();
+        M === 1 || y === that.minDate.y && M === that.minDate.M && that.$prev.addClass(className);
+        M === 12 || y === that.maxDate.y && M === that.maxDate.M && that.$next.addClass(className);
+    }
+
     fn.bindEvents = function() {
         var that = this
             , switchHandle = function(e) {
+                that.fixBtnStatus();
                 that.renderDays(+that.$month.val(), +that.$year.val());
                 that.args.onSwitch.call(that, {
                     y: +that.$year.val()
                     , M: +that.$month.val()
                 }, that.$year, that.$month);
             };
-        that.$year.change(switchHandle);
+        that.$year.change(function(e) {
+            that.renderMonths(+that.$year.val());
+            switchHandle(e);
+        });
         that.$month.change(switchHandle);
 
         that.$prev.click(function(e) {
             e.preventDefault();
-            var m = +that.$month.val()
+            if($(this).hasClass(that.pre + "-disable")) return;
+            var M = +that.$month.val()
                 , y = +that.$year.val();
-            switchHandle();
-            $(that.$next).removeClass("mod-calendar-disable");
-            if(m === 1) {
-                if(y === that.yearFrom) {
-                    if(that.args.switchLoop) {
-                        that.$month.val(12);
-                        that.$year.val(that.yearTo);
-                    }
-                    else {
-                        $(this).addClass("mod-calendar-disable");
-                    }
+
+            // redraw month panel
+            y === that.maxDate.y && M === 1 && that.renderMonths(y - 1);
+
+            that.args.switchLoop && y === that.minDate.y && M === that.minDate.M && that.renderMonths(that.maxDate.y);
+
+            // overflow handle
+            if(y === that.minDate.y && M === that.minDate.M) {
+
+                // keep loop
+                if(that.args.switchLoop) {
+                    that.$month.val(that.maxDate.M);
+                    that.$year.val(that.maxDate.y);
                 }
-                else {
+            }
+
+            else {
+                if(M === 1) {
                     that.$month.val(12);
                     that.$year.val(y - 1);
                 }
+                else {
+                    that.$month.val(M - 1);
+                }
             }
-            else {
-                that.$month.val(m - 1);
-            }
+
+            switchHandle();
         });
 
         that.$next.click(function(e) {
             e.preventDefault();
-            var m = +that.$month.val()
+            if($(this).hasClass(that.pre + "-disable")) return;
+            var M = +that.$month.val()
                 , y = +that.$year.val();
-            switchHandle();
-            $(that.$prev).removeClass("mod-calendar-disable");
-            if(m === 12) {
-                if(y === that.yearTo) {
-                    if(that.args.switchLoop) {
-                        that.$month.val(1);
-                        that.$year.val(that.yearFrom);
-                    }
-                    else {
-                        $(this).addClass("mod-calendar-disable");
-                    }
+
+            // redraw month panel
+            y === that.minDate.y && M === that.minDate.M && that.renderMonths(y - 1);
+
+            that.args.switchLoop && y === that.maxDate.y && M === that.maxDate.M && that.renderMonths(that.minDate.y);
+
+            // overflow handle
+            if(y === that.maxDate.y && M === that.maxDate.M) {
+
+                // keep loop
+                if(that.args.switchLoop) {
+                    that.$month.val(1);
+                    that.$year.val(that.minDate.y);
                 }
-                else {
+            }
+
+            else {
+                if(M === 12) {
                     that.$month.val(1);
                     that.$year.val(y + 1);
                 }
+                else {
+                    that.$month.val(M + 1);
+                }
             }
-            else {
-                that.$month.val(m + 1);
-            }
+            switchHandle();
+        });
+
+        that.$days.on("click", "li", function(e) {
+            e.preventDefault();
+            !$(this).hasClass("mod-calendar-holder") && that.args.onClick.call(this, that.$year.val(), that.$month.val(), $(this).text());
         });
     }
 

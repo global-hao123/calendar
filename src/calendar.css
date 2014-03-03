@@ -190,9 +190,67 @@ li.mod-calendar-today{ position: relative; border-bottom: none;}
 extend
  */
 .mod-calendar--mini{
-    width: 200px;
+    width: 250px;
     *padding-right: 5px;
+    border-color: #E0E0E0;
+    padding: 0;
+    background: #fff;
+    display: none;
+    position: absolute;
+    z-index: 11;
 }
+
+.mod-calendar--mini .mod-calendar_hd{
+    border-bottom: 1px solid #DBDBDB;
+    margin-bottom: 0;
+    background: #FAFCFC;
+}
+
+.mod-calendar--mini .mod-calendar_bd{
+    margin: 0;
+    background: #fff;
+}
+
+.mod-calendar--mini .ui-bubble_in{
+    border-bottom-color: #FAFCFC;
+}
+
+.mod-calendar--mini .ui-bubble_out{
+    border-bottom-color: #E0E0E0;
+}
+
+.mod-calendar--mini .mod-calendar_prev{ float: left; margin-left: 5px;}
+.mod-calendar--mini .mod-calendar_next{ float: right; margin-right: 5px;}
+
+.mod-calendar--mini .mod-calendar_grid{
+    width: 95%;
+    /*padding: 0 10px;*/
+    margin: 0 auto;
+}
+
+.mod-calendar--mini .mod-calendar_weeks{
+    background-color: #F5F7F7;
+    border: none;
+    color: #7F7F7F;
+    padding: 0 5px;
+    width: 100%;
+}
+
+.mod-calendar--mini .mod-calendar_weeks li{
+    height: 25px;
+    line-height: 25px;
+    border: none;
+    background: none;
+}
+
+.mod-calendar--mini .mod-calendar_days{
+    margin: 5px auto;
+}
+
+.mod-calendar--mini .mod-calendar_days li{
+    border: none;
+}
+
 
 .mod-calendar--mini .mod-calendar_grid li{
     *width: 13.4%;
@@ -203,12 +261,12 @@ extend
 }
 
 .mod-calendar--mini .mod-calendar_days a{
-    height: 23px;
-    line-height: 23px;
+    height: 28px;
+    line-height: 28px;
 }
 
 .mod-calendar--mini .mod-calendar_days dl{
-    height: 23px;
+    height: 28px;
 }
 
 .mod-calendar--mini .mod-calendar_days dt{
@@ -220,8 +278,16 @@ extend
     display: none;
 }
 
-.mod-calendar--mini .mod-calendar_prev{ float: left; margin-left: 5px;}
-.mod-calendar--mini .mod-calendar_next{ float: right; margin-right: 5px;}
+.mod-calendar--mini .mod-calendar_days a:hover dl{
+    border-color: #fff;
+    background: #E8EAEB;
+}
+
+.mod-calendar--mini .mod-calendar-today dl{ background: #1EB57D; border-color: #fff;}
+.mod-calendar--mini .mod-calendar-today a:hover dl{ background: #1EB57D; border-color: #fff;}
+
+.mod-calendar--mini .mod-calendar-holder a{ border-color: #fff;}
+.mod-calendar--mini .mod-calendar-holder dl{ background: #fff; color: #aaa;}
 
 .mod-calendar--full{
     width: 980px;

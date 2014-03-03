@@ -36,20 +36,23 @@
 
     <h2>mini:</h2>
 
-    <div id="mini" class="ui-bubble ui-bubble-t mod-calendar mod-calendar--mini">
-        <b class="ui-arrow ui-bubble_out"></b>
-        <b class="ui-arrow ui-bubble_in"></b>
-        <div class="mod-calendar_hd">
-            <a href="#" class="mod-calendar_next">→</a>
-            <a href="#" class="mod-calendar_prev">←</a>
-            <select class="mod-calendar_year"></select>
-            <select class="mod-calendar_month"></select>
+    <div style="position: relative;">
+        <input id="miniEmit" type="text" style=" height: 21px; line-height: 21px;">
+        <div id="mini" class="ui-bubble ui-bubble-t mod-calendar mod-calendar--mini" style="position: absolute; top: 30px; left: 0;">
+            <b class="ui-arrow ui-bubble_out"></b>
+            <b class="ui-arrow ui-bubble_in"></b>
+            <div class="mod-calendar_hd">
+                <a href="#" class="mod-calendar_next">→</a>
+                <a href="#" class="mod-calendar_prev">←</a>
+                <select class="mod-calendar_year"></select>
+                <select class="mod-calendar_month"></select>
+            </div>
+            <div class="mod-calendar_bd">
+                <ul class="mod-calendar_grid mod-calendar_weeks cf"></ul>
+                <ul class="mod-calendar_grid mod-calendar_days cf"></ul>
+            </div>
+            <div class="mod-calendar_ft"></div>
         </div>
-        <div class="mod-calendar_bd">
-            <ul class="mod-calendar_grid mod-calendar_weeks cf"></ul>
-            <ul class="mod-calendar_grid mod-calendar_days cf"></ul>
-        </div>
-        <div class="mod-calendar_ft"></div>
     </div>
 
     <h2>full:</h2>
@@ -99,12 +102,24 @@ $("#simple").calendar({
     }
 });
 
-$("#mini").calendar({
+// mini demo
+var mini = $("#mini").calendar({
+    onClick: function(y, M, d) {
+        $("#miniEmit").val(new Date(y, M, d).format("yyyy-MM-dd"));
+        $("dt", this).css({"color": "#f00"});
+        mini.$el.hide();
+    }
+    , onFilterDays: function(data) {
+        if(data.d == 13) data.className = 'class=' + this.args.selectorPrefix + "-holiday";
+        return data;
+    }
+});
 
+$("#miniEmit").focus(function() {
+    mini.$el.show();
 });
 
 $("#full").calendar({
-
 });
 </script>
 </html>
