@@ -109,19 +109,19 @@ now: new Date
 
 /**
  * Custom min date or the offset of begin date
- * @notice support: "2014-3-1" | 2 | "-1"
- * @notice Built-Lunar only supports 1901-1-1 ~ 2049-12-31
+ * @notice support: "2014/3/1" | 2 | "-1"
+ * @notice Built-Lunar only supports 1901/1/1 ~ 2049/12/31
  * @type {String | Number}
  */
-, minDate: "2004-3-1"
+, minDate: "2004/3/1"
 
 /**
  * Custom max date or the offset of end date
- * @notice support: "2014-3-1" | 2 | "-1"
- * @notice Built-Lunar only supports 1901-1-1 ~ 2049-12-31
+ * @notice support: "2014/3/1" | 2 | "/1"
+ * @notice Built-Lunar only supports 1901/1/1 ~ 2049/12/31
  * @type {String | Number}
  */
-, maxDate: "2024-3-1"
+, maxDate: "2024/3/1"
 
 /**
  * Abbreviation week(3 letters, uppercase)
