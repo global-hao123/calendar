@@ -290,7 +290,9 @@
                 }, that.$year, that.$month);
             };
         that.$year.change(function(e) {
+            var curMonth = +that.$month.val();
             that.renderMonths(+that.$year.val());
+            that.$month.val(curMonth);
             switchHandle(e);
         });
         that.$month.change(switchHandle);
